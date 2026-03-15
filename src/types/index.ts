@@ -70,6 +70,8 @@ export interface RecommendationRequest {
   amount: number;
   channel?: string;
   paymentApp?: string;
+  transactionDate?: string;
+  hasAmazonPrime?: boolean;
 }
 
 export interface RecommendationResponse {
