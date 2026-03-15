@@ -10,7 +10,8 @@ import { Badge } from '../components/ui/Badge';
 import { CardSkeleton } from '../components/ui/Skeleton';
 import { PageLayout } from '../components/layout/PageLayout';
 
-function rewardColor(type: string): 'blue' | 'green' | 'yellow' | 'gray' {
+function rewardColor(type: string | undefined): 'blue' | 'green' | 'yellow' | 'gray' {
+  if (!type) return 'gray';
   if (type.includes('CASHBACK') || type.includes('cashback')) return 'green';
   if (type.includes('POINTS') || type.includes('points')) return 'blue';
   if (type.includes('MILES') || type.includes('miles')) return 'yellow';
@@ -129,7 +130,7 @@ export function Onboarding() {
                           <p className="text-xs text-gray-500">{card.bankName}</p>
                         </div>
                         <Badge
-                          label={card.rewardType.replace(/_/g, ' ')}
+                          label={(card.rewardType ?? '').replace(/_/g, ' ')}
                           color={rewardColor(card.rewardType)}
                         />
                       </button>

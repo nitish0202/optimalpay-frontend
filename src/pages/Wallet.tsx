@@ -13,7 +13,8 @@ import axios from 'axios';
 
 const MAX_CARDS = 20;
 
-function rewardColor(type: string): 'green' | 'blue' | 'yellow' | 'gray' {
+function rewardColor(type: string | undefined): 'green' | 'blue' | 'yellow' | 'gray' {
+  if (!type) return 'gray';
   const t = type.toLowerCase();
   if (t.includes('cashback') || t.includes('cash')) return 'green';
   if (t.includes('miles')) return 'yellow';
@@ -103,7 +104,7 @@ function CardPickerModal({
                       <p className="text-sm font-medium text-navy truncate">{card.cardName}</p>
                       <p className="text-xs text-gray-400">{card.bankName}</p>
                     </div>
-                    <Badge label={card.rewardType.replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
+                    <Badge label={(card.rewardType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
                     {inWallet ? (
                       <Check size={16} className="text-green-500 flex-shrink-0" />
                     ) : (
@@ -176,7 +177,7 @@ function CardRow({
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Badge label={card.rewardType.replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
+          <Badge label={(card.rewardType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
           {card.isPrimary && <Badge label="Primary" color="green" />}
           <div className="relative">
             <button

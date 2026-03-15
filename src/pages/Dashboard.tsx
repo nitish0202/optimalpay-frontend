@@ -8,7 +8,8 @@ import { CardSkeleton } from '../components/ui/Skeleton';
 import { Badge } from '../components/ui/Badge';
 import type { WalletCardResponse } from '../types';
 
-function rewardColor(type: string): 'green' | 'blue' | 'yellow' | 'gray' {
+function rewardColor(type: string | undefined): 'green' | 'blue' | 'yellow' | 'gray' {
+  if (!type) return 'gray';
   const t = type.toLowerCase();
   if (t.includes('cashback') || t.includes('cash')) return 'green';
   if (t.includes('miles')) return 'yellow';
@@ -32,7 +33,7 @@ function WalletCardTile({ card }: { card: WalletCardResponse }) {
     <div className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 ${bankAccent(card.bankName)} cursor-pointer hover:shadow-md transition-shadow`}>
       <div className="flex items-start justify-between mb-2">
         <CreditCardIcon size={18} className="text-gray-400 mt-0.5" />
-        <Badge label={card.rewardType.replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
+        <Badge label={(card.rewardType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
       </div>
       <p className="font-semibold text-navy text-sm leading-tight">{card.cardName}</p>
       {card.nickname && <p className="text-xs text-gray-400 mt-0.5">{card.nickname}</p>}
