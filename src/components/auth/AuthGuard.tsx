@@ -19,7 +19,12 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Attempt silent refresh on every mount — restores session after page reload
+    // If already authenticated (fresh login/signup), skip the refresh call
+    if (isAuthenticated()) {
+      setChecking(false);
+      return;
+    }
+    // On page reload Zustand is empty — attempt silent refresh via cookie
     refreshTokens()
       .then((data) => setAuth(data.user, data.accessToken))
       .catch(() => clearAuth())
