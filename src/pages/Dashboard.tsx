@@ -30,14 +30,14 @@ function bankAccent(bankName: string): string {
 
 function WalletCardTile({ card }: { card: WalletCardResponse }) {
   return (
-    <div className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 ${bankAccent(card.bankName)} cursor-pointer hover:shadow-md transition-shadow`}>
+    <div className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 ${bankAccent(card.bankId)} cursor-pointer hover:shadow-md transition-shadow`}>
       <div className="flex items-start justify-between mb-2">
         <CreditCardIcon size={18} className="text-gray-400 mt-0.5" />
-        <Badge label={(card.rewardType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
+        <Badge label={(card.rewardCurrencyType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardCurrencyType)} />
       </div>
-      <p className="font-semibold text-navy text-sm leading-tight">{card.cardName}</p>
+      <p className="font-semibold text-navy text-sm leading-tight">{card.displayName}</p>
       {card.nickname && <p className="text-xs text-gray-400 mt-0.5">{card.nickname}</p>}
-      <p className="text-xs text-gray-500 mt-1">{card.bankName}</p>
+      <p className="text-xs text-gray-500 mt-1">{card.bankId}</p>
       {card.isPrimary && (
         <span className="inline-block mt-2 text-xs text-green-600 font-medium">● Primary</span>
       )}

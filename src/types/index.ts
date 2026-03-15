@@ -27,9 +27,10 @@ export interface LoginRequest {
 export interface WalletCardResponse {
   id: string;
   cardId: string;
-  cardName: string;
-  bankName: string;
-  rewardType: string;
+  displayName: string;
+  bankId: string;
+  cardTier?: string;
+  rewardCurrencyType?: string;
   isPrimary: boolean;
   nickname?: string;
   addedAt: string;
@@ -49,16 +50,14 @@ export interface UpdateCardRequest {
 // ── Card Catalogue ────────────────────────────────────────────────────────────
 
 export interface CreditCard {
-  cardId: string;
-  cardName: string;
-  bankName: string;
+  id: string;
+  displayName: string;
   bankId: string;
-  rewardType: string;
-  cardCategory?: string;
-  cardStatus: string;
-  joiningFee?: number;
+  cardTier?: string;
+  cardNetwork?: string;
+  rewardCurrencyType?: string;
   annualFee?: number;
-  imageUrl?: string;
+  status?: string;
 }
 
 // ── Recommendation ────────────────────────────────────────────────────────────

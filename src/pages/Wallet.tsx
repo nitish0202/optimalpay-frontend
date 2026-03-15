@@ -45,7 +45,7 @@ function CardPickerModal({
     const q = search.toLowerCase();
     if (!q) return allCards;
     return allCards.filter(
-      (c) => c.cardName.toLowerCase().includes(q) || c.bankName.toLowerCase().includes(q)
+      (c) => c.displayName.toLowerCase().includes(q) || c.bankId.toLowerCase().includes(q)
     );
   }, [allCards, search]);
 
@@ -92,28 +92,28 @@ function CardPickerModal({
           ) : (
             <div className="space-y-1.5 py-2">
               {filtered.map((card) => {
-                const inWallet = walletCardIds.has(card.cardId);
+                const inWallet = walletCardIds.has(card.id);
                 return (
                   <div
-                    key={card.cardId}
+                    key={card.id}
                     className={`flex items-center gap-3 p-3 rounded-lg border transition ${
                       inWallet ? 'border-gray-100 bg-gray-50 opacity-70' : 'border-gray-200 hover:border-brand/40 hover:bg-blue-50/30'
                     }`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-navy truncate">{card.cardName}</p>
-                      <p className="text-xs text-gray-400">{card.bankName}</p>
+                      <p className="text-sm font-medium text-navy truncate">{card.displayName}</p>
+                      <p className="text-xs text-gray-400">{card.bankId}</p>
                     </div>
-                    <Badge label={(card.rewardType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
+                    <Badge label={(card.rewardCurrencyType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardCurrencyType)} />
                     {inWallet ? (
                       <Check size={16} className="text-green-500 flex-shrink-0" />
                     ) : (
                       <button
-                        onClick={() => handleAdd(card.cardId)}
-                        disabled={adding === card.cardId}
+                        onClick={() => handleAdd(card.id)}
+                        disabled={adding === card.id}
                         className="text-brand hover:text-blue-700 text-xs font-medium flex-shrink-0 disabled:opacity-50"
                       >
-                        {adding === card.cardId ? '…' : 'Add'}
+                        {adding === card.id ? '…' : 'Add'}
                       </button>
                     )}
                   </div>
@@ -167,17 +167,17 @@ function CardRow({
             </div>
           ) : (
             <p className="font-medium text-sm text-navy">
-              {card.nickname ?? card.cardName}
-              {card.nickname && <span className="text-gray-400 font-normal ml-1 text-xs">({card.cardName})</span>}
+              {card.nickname ?? card.displayName}
+              {card.nickname && <span className="text-gray-400 font-normal ml-1 text-xs">({card.displayName})</span>}
             </p>
           )}
           <p className="text-xs text-gray-400 mt-0.5">
-            {card.bankName} · Added {new Date(card.addedAt).toLocaleDateString('en-IN')}
+            {card.bankId} · Added {new Date(card.addedAt).toLocaleDateString('en-IN')}
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Badge label={(card.rewardType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardType)} />
+          <Badge label={(card.rewardCurrencyType ?? '').replace(/_/g, ' ')} color={rewardColor(card.rewardCurrencyType)} />
           {card.isPrimary && <Badge label="Primary" color="green" />}
           <div className="relative">
             <button

@@ -37,12 +37,12 @@ export function Onboarding() {
     if (!q) return cards;
     return cards.filter(
       (c) =>
-        c.cardName.toLowerCase().includes(q) ||
-        c.bankName.toLowerCase().includes(q)
+        c.displayName.toLowerCase().includes(q) ||
+        c.bankId.toLowerCase().includes(q)
     );
   }, [cards, search]);
 
-  const selectedCards = cards.filter((c) => selected.has(c.cardId));
+  const selectedCards = cards.filter((c) => selected.has(c.id));
 
   const toggle = (cardId: string) => {
     setSelected((prev) => {
@@ -110,28 +110,28 @@ export function Onboarding() {
                   ? Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
                   : filtered.map((card: CreditCard) => (
                       <button
-                        key={card.cardId}
-                        onClick={() => toggle(card.cardId)}
+                        key={card.id}
+                        onClick={() => toggle(card.id)}
                         className={`w-full flex items-center gap-3 p-4 rounded-lg border text-left transition ${
-                          selected.has(card.cardId)
+                          selected.has(card.id)
                             ? 'border-brand bg-blue-50'
                             : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                       >
                         <div
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                            selected.has(card.cardId) ? 'border-brand bg-brand' : 'border-gray-300'
+                            selected.has(card.id) ? 'border-brand bg-brand' : 'border-gray-300'
                           }`}
                         >
-                          {selected.has(card.cardId) && <Check size={12} className="text-white" />}
+                          {selected.has(card.id) && <Check size={12} className="text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-navy truncate">{card.cardName}</p>
-                          <p className="text-xs text-gray-500">{card.bankName}</p>
+                          <p className="text-sm font-medium text-navy truncate">{card.displayName}</p>
+                          <p className="text-xs text-gray-500">{card.bankId}</p>
                         </div>
                         <Badge
-                          label={(card.rewardType ?? '').replace(/_/g, ' ')}
-                          color={rewardColor(card.rewardType)}
+                          label={(card.rewardCurrencyType ?? '').replace(/_/g, ' ')}
+                          color={rewardColor(card.rewardCurrencyType)}
                         />
                       </button>
                     ))}
@@ -162,19 +162,19 @@ export function Onboarding() {
               <div className="space-y-2 mb-6">
                 {selectedCards.map((card) => (
                   <div
-                    key={card.cardId}
+                    key={card.id}
                     className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-navy">{card.cardName}</p>
-                      <p className="text-xs text-gray-500">{card.bankName}</p>
+                      <p className="text-sm font-medium text-navy">{card.displayName}</p>
+                      <p className="text-xs text-gray-500">{card.bankId}</p>
                     </div>
                     <input
                       type="text"
                       placeholder="Nickname (optional)"
-                      value={nicknames[card.cardId] ?? ''}
+                      value={nicknames[card.id] ?? ''}
                       onChange={(e) =>
-                        setNicknames((prev) => ({ ...prev, [card.cardId]: e.target.value }))
+                        setNicknames((prev) => ({ ...prev, [card.id]: e.target.value }))
                       }
                       className="w-36 px-2 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand"
                     />
