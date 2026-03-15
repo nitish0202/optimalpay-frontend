@@ -47,7 +47,7 @@ export function Onboarding() {
   const toggle = (cardId: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(cardId) ? next.delete(cardId) : next.add(cardId);
+      if (next.has(cardId)) { next.delete(cardId); } else { next.add(cardId); }
       return next;
     });
   };
