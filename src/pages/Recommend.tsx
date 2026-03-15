@@ -33,7 +33,7 @@ const LOADING_MESSAGES = [
 ];
 
 const schema = z.object({
-  merchantName: z.string().optional(),
+  merchantDisplay: z.string().optional(),   // display only, not sent to backend
   amount: z
     .string()
     .min(1, 'Enter an amount')
@@ -73,9 +73,13 @@ function LoadingOverlay() {
 function MerchantSearch({
   value,
   onChange,
+  onSelect,
+  onClear,
 }: {
   value: string;
-  onChange: (v: string) => void;
+  onChange: (displayName: string) => void;
+  onSelect: (merchantId: string, displayName: string) => void;
+  onClear: () => void;
 }) {
   const [query, setQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<Merchant[]>([]);
@@ -106,13 +110,15 @@ function MerchantSearch({
     const v = e.target.value;
     setQuery(v);
     onChange(v);
+    onClear();  // user is typing freely — clear any previously selected merchantId
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchSuggestions(v), 300);
   };
 
-  const handleSelect = (name: string) => {
-    setQuery(name);
-    onChange(name);
+  const handleSelect = (m: Merchant) => {
+    setQuery(m.merchantName);
+    onChange(m.merchantName);
+    onSelect(m.merchantId, m.merchantName);
     setSuggestions([]);
     setOpen(false);
   };
@@ -120,6 +126,7 @@ function MerchantSearch({
   const handleClear = () => {
     setQuery('');
     onChange('');
+    onClear();
     setSuggestions([]);
     setOpen(false);
   };
@@ -146,7 +153,7 @@ function MerchantSearch({
           value={query}
           onChange={handleInput}
           onFocus={() => suggestions.length > 0 && setOpen(true)}
-          placeholder="e.g. Swiggy, Amazon, Zomato"
+          placeholder="Search merchants e.g. Swiggy, Amazon…"
           className="w-full pl-9 pr-8 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
         />
         {loading && (
@@ -168,7 +175,7 @@ function MerchantSearch({
             <button
               key={m.merchantId}
               type="button"
-              onClick={() => handleSelect(m.merchantName)}
+              onClick={() => handleSelect(m)}
               className="w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 text-navy border-b border-gray-50 last:border-0"
             >
               <span className="font-medium">{m.merchantName}</span>
@@ -188,12 +195,15 @@ export function Recommend() {
   const recommend = useRecommend();
   const setResult = useRecommendStore((s) => s.setResult);
 
+  // merchantId is tracked outside RHF — set when user picks from autocomplete, cleared on free typing
+  const merchantIdRef = useRef<string | null>(null);
+
   const today = new Date().toISOString().split('T')[0];
 
   const { register, handleSubmit, watch, control, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      merchantName: '',
+      merchantDisplay: '',
       amount: '',
       categoryId: '',
       channel: 'ONLINE',
@@ -203,22 +213,23 @@ export function Recommend() {
     },
   });
 
-  const merchantName = watch('merchantName');
+  const merchantDisplay = watch('merchantDisplay');
   const categoryId = watch('categoryId');
   const channel = watch('channel');
   const amount = watch('amount');
 
-  const isAmazonMerchant = merchantName?.toLowerCase().includes('amazon');
+  const isAmazonMerchant = merchantDisplay?.toLowerCase().includes('amazon');
   const isShoppingCategory = categoryId === 'shopping';
   const showPrime = isAmazonMerchant || isShoppingCategory;
   const showPaymentApp = channel === 'APP';
-  const canSubmit = (!!merchantName?.trim() || !!categoryId) && !!amount && Number(amount) > 0;
+  // Can submit if: a merchantId was selected from autocomplete, OR a category is chosen
+  const canSubmit = (!!merchantIdRef.current || !!categoryId) && !!amount && Number(amount) > 0;
 
   const onSubmit = async (data: FormData) => {
     const result = await recommend.mutateAsync({
-      merchantName: data.merchantName || undefined,
-      amount: Number(data.amount),
+      merchantId: merchantIdRef.current ?? undefined,
       categoryId: data.categoryId || undefined,
+      amount: Number(data.amount),
       channel: data.channel,
       paymentApp: data.paymentApp || undefined,
       transactionDate: data.transactionDate,
@@ -246,12 +257,22 @@ export function Recommend() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {/* Merchant search */}
           <Controller
-            name="merchantName"
+            name="merchantDisplay"
             control={control}
             render={({ field }) => (
-              <MerchantSearch value={field.value ?? ''} onChange={field.onChange} />
+              <MerchantSearch
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                onSelect={(id) => { merchantIdRef.current = id; }}
+                onClear={() => { merchantIdRef.current = null; }}
+              />
             )}
           />
+          {merchantIdRef.current === null && !categoryId && (
+            <p className="text-xs text-amber-600 -mt-3">
+              Select a merchant from the dropdown, or choose a category below.
+            </p>
+          )}
 
           {/* Amount */}
           <div>
@@ -270,28 +291,26 @@ export function Recommend() {
             {errors.amount && <p className="mt-1 text-xs text-red-600">{errors.amount.message}</p>}
           </div>
 
-          {/* Category (only when no merchant) */}
-          {!merchantName?.trim() && (
-            <div>
-              <label className="block text-sm font-medium text-navy mb-1">
-                Category <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-              <select
-                {...register('categoryId')}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-              >
-                <option value="">— Select a category —</option>
-                <option value="dining">Dining</option>
-                <option value="grocery">Grocery</option>
-                <option value="fuel">Fuel</option>
-                <option value="travel">Travel</option>
-                <option value="shopping">Shopping</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="utilities">Utilities</option>
-                <option value="rent">Rent</option>
-              </select>
-            </div>
-          )}
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-navy mb-1">
+              Category <span className="text-gray-400 font-normal">(optional if merchant selected)</span>
+            </label>
+            <select
+              {...register('categoryId')}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+            >
+              <option value="">— Select a category —</option>
+              <option value="dining">Dining</option>
+              <option value="grocery">Grocery</option>
+              <option value="fuel">Fuel</option>
+              <option value="travel">Travel</option>
+              <option value="shopping">Shopping</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="utilities">Utilities</option>
+              <option value="rent">Rent</option>
+            </select>
+          </div>
 
           {/* Channel */}
           <div>
