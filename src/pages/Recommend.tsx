@@ -301,14 +301,16 @@ export function Recommend() {
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             >
               <option value="">— Select a category —</option>
-              <option value="dining">Dining</option>
-              <option value="grocery">Grocery</option>
+              <option value="dining">Dining &amp; Restaurants</option>
+              <option value="groceries">Groceries</option>
               <option value="fuel">Fuel</option>
               <option value="travel">Travel</option>
-              <option value="shopping">Shopping</option>
+              <option value="ecommerce">Online Shopping</option>
               <option value="entertainment">Entertainment</option>
-              <option value="utilities">Utilities</option>
-              <option value="rent">Rent</option>
+              <option value="utilities">Utilities &amp; Bills</option>
+              <option value="food_delivery">Food Delivery</option>
+              <option value="quick_commerce">Quick Commerce</option>
+              <option value="electronics">Electronics</option>
             </select>
           </div>
 
